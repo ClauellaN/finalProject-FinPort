@@ -12,7 +12,7 @@ const Activity = async (req, res) => {
     const database = client.db("FinPort");
     const paymentsCollection = database.collection("payments");
 
-    // Find all payment records with the same id
+    // Find all payment records for the same clientId
     const paymentActivity = await paymentsCollection
       .find({ clientId: new ObjectId(req.params.id) }) 
       .toArray(); 
