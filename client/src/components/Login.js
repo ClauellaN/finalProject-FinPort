@@ -1,49 +1,48 @@
-import React, { useState } from "react"; 
-import logo from "../pages/assets/logo-fin.png"; 
-import styled from "styled-components"; 
-import { useNavigate } from "react-router-dom"; 
+import React, { useState } from "react";
+import logo from "../pages/assets/logo-fin.png";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const Login = () => {
   // State variables to store the email, password, and any error messages
-  const [email, setEmail] = useState(""); // email is initially an empty string
-  const [password, setPassword] = useState(""); // password is initially an empty string
-  const [errorMessage, setErrorMessage] = useState(""); 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   // Function that handles form submission (when the user clicks "Login")
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevents the page from refreshing when the form is submitted
+    e.preventDefault();
+    setLoading(true); // Start loading when form is submitted
 
     try {
-      // Send a request to  server (back end) to authenticate the user
+      // Send a request to server (back end) to authenticate the user
       const response = await fetch("/login", {
-        method: "POST", // Use POST method since we're sending data to the server
+        method: "POST",
         headers: {
-          "Content-Type": "application/json", // Tell the server that we are sending JSON data
+          "Content-Type": "application/json",
         },
-        // The body contains the email and password entered by the user
         body: JSON.stringify({
-          email, // Email from the state (what the user typed)
-          password, // Password from the state (what the user typed)
+          email,
+          password,
         }),
       });
 
-      // Convert the response from the server to JSON format
       const data = await response.json();
 
       if (response.ok) {
-        // If the response is "ok", meaning the user credentials were valid
-        console.log("User logged in successfully!"); // Log a success message
+        console.log("User logged in successfully!");
         navigate("/home"); // Navigate to the "home" page after successful login
       } else {
-        // If the response is not ok (e.g., invalid email or password), show an error message
-        setErrorMessage(data.error || "Login failed"); // Display the error message
+        setErrorMessage(data.error || "Login failed");
       }
     } catch (error) {
-      // If there was an error connecting to the server or some other issue
-      setErrorMessage("An error occurred. Please try again."); // Display a generic error message
-      console.error("Error during login:", error); // Log the error for debugging
+      setErrorMessage("An error occurred. Please try again.");
+      console.error("Error during login:", error);
+    } finally {
+      setLoading(false); // Stop loading after the process finishes
     }
   };
 
@@ -52,31 +51,30 @@ const Login = () => {
     <LoginContainer>
       <Logo src={logo} alt="FinPort Logo" />
       <Title>Login to your FinPort account</Title>
-      {/* The form where the user enters their email and password */}
       <Form onSubmit={handleSubmit}>
-        {/* Email input field */}
         <Input
-          type="email" // Specifies that this input is for emails
-          placeholder="Email" // Placeholder text inside the input field
-          required // Makes the field required (user cannot submit without filling it)
-          value={email} // Binds the input value to the state
-          onChange={(e) => setEmail(e.target.value)} // Updates state when the user types
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
-        {/* Password input field */}
         <Input
-          type="password" // Specifies that this input is for passwords (hides the input text)
-          placeholder="Password" // Placeholder text inside the input field
-          required // Makes the field required
-          value={password} // Binds the input value to the state
-          onChange={(e) => setPassword(e.target.value)} // Updates state when the user types
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         {/* Error message (if any) */}
-        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}{" "}
-        {/* Submit button */}
-        <SubmitButton type="submit">Login</SubmitButton>{" "}
-        {/* Button to submit the form */}
+        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+
+        {/* Conditionally render "Logging in..." or "Login" based on loading state */}
+        <SubmitButton type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </SubmitButton>
       </Form>
-      <AccountText>Dont have an account yet?</AccountText>
+      <AccountText>Don't have an account yet?</AccountText>
       <Link to="/register">
         <LoginButton>Sign Up</LoginButton>
       </Link>
@@ -90,75 +88,74 @@ const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; // Align items to the top of the page
-  min-height: 100vh; // Set the minimum height to fill the whole screen
-  padding-top: 50px; // Add space at the top
-  background-color: #f4f4f9; // Light background color
-  font-family: Arial, sans-serif; // Font for the text
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding-top: 50px;
+  background-color: #f4f4f9;
+  font-family: Arial, sans-serif;
 `;
 
-// Styles for the logo image
 const Logo = styled.img`
-  height: 90px; // Set the height of the logo
-  margin-bottom: 20px; // Add space below the logo
+  height: 90px;
+  margin-bottom: 20px;
 `;
 
-// Styles for the form title
 const Title = styled.h2`
-  font-size: 1.5rem; // Set the font size
-  color: #2c3e50; // Set the text color
-  margin-bottom: 20px; // Add space below the title
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
 `;
 
-// Styles for the form itself
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 400px; // Maximum width of the form
-  background-color: white; // White background for the form
-  padding: 40px; // Add padding inside the form
-  border-radius: 10px; // Rounded corners
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); // Add a shadow effect
+  max-width: 400px;
+  background-color: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 `;
 
-// Styles for the input fields
 const Input = styled.input`
-  padding: 12px 15px; // Padding inside the input field
-  margin-bottom: 15px; // Add space below each input
-  border: 1px solid #ccc; // Light grey border
-  border-radius: 5px; // Rounded corners for the input
-  font-size: 1rem; // Font size for the text inside the input
-  outline: none; // Removes the default outline on focus
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
 
   &:focus {
-    border-color: purple; // Change the border color when focused
-    box-shadow: 0 0 5px purple; // Add a purple glow around the input
+    border-color: purple;
+    box-shadow: 0 0 5px purple;
   }
 `;
 
-// Styles for the submit button
 const SubmitButton = styled.button`
-  padding: 12px 15px; // Padding inside the button
-  background-color: purple; // Purple background color
-  color: white; // White text color
-  font-size: 1rem; // Font size for the button text
-  font-weight: bold; // Bold text
-  border: none; // Remove the border
-  border-radius: 5px; // Rounded corners for the button
-  cursor: pointer; // Pointer cursor on hover
-  transition: background-color 0.3s ease; // Smooth transition for hover effect
+  padding: 12px 15px;
+  background-color: purple;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: darkpurple; // Darker purple when hovered
+    background-color: darkpurple;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
   }
 `;
 
-// Styles for the error message
 const ErrorText = styled.p`
-  color: red; // Red text color for the error message
-  font-size: 1.2rem; // Font size for the error message
-  margin-bottom: 15px; // Add space below the error message
+  color: red;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
 `;
 
 const AccountText = styled.h4`

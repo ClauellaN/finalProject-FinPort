@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import PaymentForm from "./PaymentForm"; // Import your PaymentForm component
-import CloseAccount from "./CloseAccount"; // Import your CloseAccount component
+import PaymentForm from "./PaymentForm"; 
+import CloseAccount from "./CloseAccount"; 
+import { Loading } from "./LoadingSpiner"; 
 
 const ClientLayout = () => {
   const { clientId } = useParams(); // Get clientId from the URL
@@ -38,7 +39,7 @@ const ClientLayout = () => {
   }, [clientId]);
 
   if (loading) {
-    return <p>Loading client information...</p>;
+    return <Loading/>;
   }
 
   if (error) {

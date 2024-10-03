@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import logo from "../pages/assets/logo-fin.png";
 import styled from "styled-components";
@@ -18,9 +17,10 @@ const Registration = () => {
     confirmPassword: "",
   });
 
-  // States for handling errors and success messages
+  // States for handling errors, success messages, and loading state
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state to show "Registering..." message
 
   // Handle form input changes to update formData state
   const handleChange = (e) => {
@@ -32,7 +32,8 @@ const Registration = () => {
 
   // Password validation function
   const validatePassword = (password, confirmPassword) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(password)) {
       return "Password must be at least 8 characters, include an uppercase letter, a lowercase letter, a number, and a special character.";
     }
@@ -42,17 +43,21 @@ const Registration = () => {
     return null;
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
-
-    // Validate password
-    const passwordError = validatePassword(formData.password, formData.confirmPassword);
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true); // Start loading when form is submitted
+  
+    // Validate the password
+    const passwordError = validatePassword(
+      formData.password,
+      formData.confirmPassword
+    );
     if (passwordError) {
       setError(passwordError);
-      return; // Exit the function if password validation fails
+      setLoading(false); // Stop loading if validation fails
+      return;
     }
-
+  
     try {
       const response = await fetch("/register", {
         method: "POST",
@@ -61,29 +66,32 @@ const Registration = () => {
         },
         body: JSON.stringify(formData), // Sending the form data to the backend
       });
-
+  
+      const data = await response.json(); // Parse the response JSON
       if (!response.ok) {
-        console.log("Error during registration");
-        setError("Registration failed. Please try again.");
+        if (data.error === "Registration failed. Please try again.") {
+          setError(data.error);
+        } else {
+          setError("User already exixts");
+        }
+        setLoading(false); // Stop loading if registration fails
         return;
       }
-
-      const data = await response.json();
-      console.log("Registration successful:", data);
-
-      // Show success message and hide form
-      setSuccessMessage("Registration successful! Redirecting to login...");
+      // If the registration was successful
+      setSuccessMessage("Registration successful! Redirecting to the login page...");
       setError(""); // Clear any errors
-
-      // After displaying the message, navigate to the login page after 3 seconds
+  
+      // After displaying the message, navigate to the login page after 5 seconds
       setTimeout(() => {
         navigate("/login");
-      }, 3000); // 2-second delay
+      }, 5000);
     } catch (error) {
       console.error("An error occurred during registration:", error);
       setError("An error occurred. Please try again.");
+      setLoading(false); // Stop loading if an error occurs
     }
   };
+  
 
   return (
     <RegistrationContainer>
@@ -95,7 +103,7 @@ const Registration = () => {
         <SuccessMessage>{successMessage}</SuccessMessage>
       ) : (
         <>
-          {/* Show form if no success message */}
+          {/* else Show form */}
           <Form onSubmit={handleSubmit}>
             <Input
               type="text"
@@ -147,7 +155,11 @@ const Registration = () => {
             />
             {/* Display error message if any */}
             {error && <ErrorMessage>{error}</ErrorMessage>}
-            <SubmitButton type="submit">Register</SubmitButton>
+
+            {/* Conditionally render "Registering..." or "Register" based on loading state */}
+            <SubmitButton type="submit" disabled={loading}>
+              {loading ? "Registering..." : "Register"}
+            </SubmitButton>
           </Form>
 
           {/* Link to login for users who already have an account */}
@@ -225,6 +237,11 @@ const SubmitButton = styled.button`
 
   &:hover {
     background-color: darkpurple;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
   }
 `;
 

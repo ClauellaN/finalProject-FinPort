@@ -1,4 +1,3 @@
-
 // export default PaymentForm;
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -12,14 +11,17 @@ const PaymentForm = ({ clientId, fname, lname, onClose }) => {
   const [expDate, setExpDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [confirmationMessage, setConfirmationMessage] = useState("");
-  const [balance, setBalance] = useState(null); // State to store balance
-  const [paymentComplete, setPaymentComplete] = useState(false); // State to track if the payment is complete
+  const [balance, setBalance] = useState(null);
+  const [paymentComplete, setPaymentComplete] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate
 
-  // Handle form submission
+  // Handle payment form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    setLoading(true); // Start the loading spinner when the form is submitted
+  
     const paymentData = {
       paymentAmount: Number(paymentAmount),
       method: paymentMethod,
@@ -31,7 +33,7 @@ const PaymentForm = ({ clientId, fname, lname, onClose }) => {
       },
       clientId, // Use the clientId prop directly
     };
-
+  
     try {
       // First, make the payment
       const response = await fetch("/make-payment", {
@@ -41,24 +43,23 @@ const PaymentForm = ({ clientId, fname, lname, onClose }) => {
         },
         body: JSON.stringify(paymentData),
       });
-
+  
       if (response.ok) {
         setConfirmationMessage("Payment Received!");
-
+  
         // Now, fetch the remaining balance
         const balanceResponse = await fetch(`/balance/${clientId}`, {
           method: "GET",
         });
         const balanceData = await balanceResponse.json();
-
+  
         if (balanceResponse.ok) {
           setBalance(balanceData.balance);
         } else {
           setConfirmationMessage(
-            balanceData.message || "Failed to fetch balance"
+            balanceData.message || "Unable to fetch balance"
           );
         }
-
         // Set paymentComplete to true to hide the form and show the confirmation message
         setPaymentComplete(true);
       } else {
@@ -68,12 +69,15 @@ const PaymentForm = ({ clientId, fname, lname, onClose }) => {
     } catch (error) {
       console.error("Error applying payment:", error);
       setConfirmationMessage("An error occurred, please try again.");
+    } finally {
+      setLoading(false); // Stop the loading spinner after the request is done
     }
   };
+  
 
-  // Function to handle "Back" navigation to /manage
+  // Function to handle "Back" navigation to the clients account details route
   const handleBack = () => {
-    navigate(`/account-details/${clientId}`); // Navigates back to the /manage route
+    navigate(`/account-details/${clientId}`);
   };
 
   return (
@@ -141,13 +145,17 @@ const PaymentForm = ({ clientId, fname, lname, onClose }) => {
             )}
 
             <ButtonContainer>
-              <StyledButton type="submit">Submit Payment</StyledButton>
-              <StyledButton type="button" onClick={onClose}>
+              {/* Disable the submit button and show loading spinner while loading */}
+              <StyledButton type="submit" disabled={loading}>
+                {loading ? "Processing..." : "Submit Payment"}
+              </StyledButton>
+              <StyledButton type="button" onClick={onClose} disabled={loading}>
                 Cancel
               </StyledButton>
             </ButtonContainer>
           </PaymentFormStyled>
         ) : (
+          // else display the payment received confirmation message as well as the remaining balancde
           <ConfirmationContainer>
             {confirmationMessage && (
               <>
@@ -172,7 +180,6 @@ const PaymentForm = ({ clientId, fname, lname, onClose }) => {
 };
 
 export default PaymentForm;
-
 
 // Styled components for PaymentForm
 const Wrapper = styled.div`

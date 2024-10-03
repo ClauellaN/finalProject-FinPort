@@ -54,6 +54,7 @@ export default HomePage;
 
 // Styled components with animations
 const Container = styled.div`
+margin-top: 70px;
   padding: 20px;
   font-family: Arial, sans-serif;
 `;

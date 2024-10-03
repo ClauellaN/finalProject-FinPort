@@ -13,7 +13,6 @@ import Registration from "./components/Registration";
 import Manage from "./components/ManageAccount"; 
 import Faq from "./components/Faq";
 import Home from "./components/Home";
-import PaymentForm from "./components/PaymentForm";
 import PaymentPage from "./pages/PaymentPage";
 import SearchClient from "./components/SearchClient"; 
 import CloseAccount from "./components/CloseAccount";
@@ -59,3 +58,4 @@ function AppWrapper() {
 }
 
 export default AppWrapper;
+

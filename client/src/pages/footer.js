@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const Footer = () => {
   return (
     <FooterWrapper>
-      <p>© 2024 Financing Portal. All rights reserved.</p>
+      {/* <p>© 2024 Financing Portal. All rights reserved.</p> */}
     </FooterWrapper>
   );
 };

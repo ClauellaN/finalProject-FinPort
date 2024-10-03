@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { Loading } from "./LoadingSpiner";
 
 const Report = () => {
   const [clients, setClients] = useState([]);
@@ -12,9 +13,9 @@ const Report = () => {
   const [showClients, setShowClients] = useState(false);
   const [showPayments, setShowPayments] = useState(false);
   const [showClosures, setShowClosures] = useState(false);
-  const [showDownloadButton, setShowDownloadButton] = useState(false); // New state for download button
+  const [showDownloadButton, setShowDownloadButton] = useState(false);
 
-  // Fetch clients
+  // Fetch all clients and storing them in clients state
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -33,7 +34,7 @@ const Report = () => {
     fetchClients();
   }, []);
 
-  // Fetch payments
+  // Fetchicng all payments and storing them in payments state
   const fetchPayments = async () => {
     setLoading(true);
     try {
@@ -50,7 +51,7 @@ const Report = () => {
     }
   };
 
-  // Fetch account closures
+  // Fetching accounts closed and storing them in accountClosures state
   const fetchClosures = async () => {
     setLoading(true);
     try {
@@ -66,7 +67,6 @@ const Report = () => {
       setLoading(false);
     }
   };
-
   // PDF download function
   const downloadPDF = () => {
     const input = document.getElementById("report-content");
@@ -77,9 +77,8 @@ const Report = () => {
       pdf.save("report.pdf");
     });
   };
-
   if (loading) {
-    return <p>Loading...</p>;
+    return <Loading />;
   }
 
   if (error) {
@@ -89,15 +88,14 @@ const Report = () => {
   return (
     <div>
       <Header>Reporting</Header>
-
-      {/* Flex container for the buttons */}
       <ButtonContainer>
         <AllClientsButton
           onClick={() => {
+            // hiding all payments list and accounts closed list and only displaying clients and download button
             setShowClients(true);
             setShowPayments(false);
             setShowClosures(false);
-            setShowDownloadButton(true); // Show download button
+            setShowDownloadButton(true);
           }}
         >
           All Clients
@@ -105,10 +103,11 @@ const Report = () => {
 
         <AllClientsButton
           onClick={() => {
+            // hiding all clients list and accounts closed list and only displaying payments and download button
             setShowPayments(true);
             setShowClients(false);
             setShowClosures(false);
-            setShowDownloadButton(true); // Show download button
+            setShowDownloadButton(true);
             if (!payments.length) {
               fetchPayments();
             }
@@ -119,10 +118,11 @@ const Report = () => {
 
         <AllClientsButton
           onClick={() => {
+            // hiding all payments list and clients list and only displaying clients and download button
             setShowClosures(true);
             setShowClients(false);
             setShowPayments(false);
-            setShowDownloadButton(true); // Show download button
+            setShowDownloadButton(true);
             if (!accountClosures.length) {
               fetchClosures();
             }
@@ -133,7 +133,7 @@ const Report = () => {
       </ButtonContainer>
 
       <ReportContainer id="report-content">
-        {/* Clients */}
+        {/* mapping through clients list collection and displayong their names and balance left */}
         {showClients && (
           <div>
             {clients.map((client, index) => (
@@ -147,7 +147,7 @@ const Report = () => {
           </div>
         )}
 
-        {/* Payments */}
+        {/* mapping through payments list collection and displaying their names, amount paid and method of payment as well as the date */}
         {showPayments && (
           <div>
             {payments.map((payment, index) => (
@@ -168,12 +168,14 @@ const Report = () => {
                     ? new Date(payment.timestamp).toLocaleString()
                     : "N/A"}
                 </ClientDeets>
+                <ClientDeets>
+                  Balance Left: ${payment.details?.newBalance || "0.00"}
+                </ClientDeets>
               </ClientListItem>
             ))}
           </div>
         )}
-
-        {/* Account Closures */}
+        {/* Mapping through the activity log collection and targeting action: accountClosed and displaying the names, item purchased and balance left, and closure date  */}
         {showClosures && (
           <div>
             {accountClosures.map((closure, index) => (
@@ -196,8 +198,8 @@ const Report = () => {
           </div>
         )}
       </ReportContainer>
-            {/* Conditionally render the Download button */}
-            {showDownloadButton && (
+      {/* Conditionally render the Download button */}
+      {showDownloadButton && (
         <DownloadButton onClick={downloadPDF}>
           Download Report as PDF
         </DownloadButton>

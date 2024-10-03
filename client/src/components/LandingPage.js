@@ -1,10 +1,8 @@
-
-
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import logo from "../pages/assets/logo-fin.png";
-import bgImage from "../pages/assets/BG.JPG"; 
+import bgImage from "../pages/assets/BG.JPG";
 
 const LandingPage = () => {
   return (
@@ -25,7 +23,6 @@ const LandingPage = () => {
     </HomeContainer>
   );
 };
-
 export default LandingPage;
 
 // Styled components
@@ -39,7 +36,7 @@ const HomeContainer = styled.div`
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   position: relative;
 `;
 
@@ -106,7 +103,7 @@ const StyledLink = styled(Link)`
 `;
 
 const Button = styled.button`
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: rgba(255, 255, 255, 0.1);
   font-weight: bold;
   font-size: 1.5rem;

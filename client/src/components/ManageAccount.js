@@ -1,18 +1,30 @@
-
 import React, { useState } from "react";
 import styled from "styled-components";
 import AddClient from "./AddClient";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import heroImage from "../pages/assets/hero.JPG"; 
+import { useNavigate } from "react-router-dom";
+import heroImage from "../pages/assets/hero.JPG";
+import { Loading } from "./LoadingSpiner";
 
 const Manage = () => {
   const [activeTab, setActiveTab] = useState("search"); // State to control active tab
   const [fullName, setFullName] = useState(""); // Input for searching client
   const [error, setError] = useState(""); // State for storing error messages
-  const navigate = useNavigate(); 
-  //function to handle the account search by first and last name
+  const [loading, setLoading] = useState(false); // Loading state for the spinner
+  const navigate = useNavigate();
+
+  // Function to handle the account search by first and last name
   const handleSearch = async () => {
     const [fname, lname] = fullName.split(" ");
+
+    // Validate that both first and last names are provided
+    if (!fname || !lname || !isNaN(fname) || !isNaN(lname)) {
+      setError("Please enter a valid first and last name.");
+      return;
+    }
+    // removing error messages and loading state to true before making the request
+    setError("");
+    setLoading(true);
+
     try {
       const response = await fetch(`/getclient`, {
         method: "POST",
@@ -21,18 +33,23 @@ const Manage = () => {
         },
         body: JSON.stringify({ fname, lname }),
       });
-  
+
       const data = await response.json();
+
+      // If the response is successful, navigate to the client's account details page
       if (response.ok) {
         setError("");
         // Navigate with client ID in the URL
-        navigate(`/account-details/${data._id}`); 
+        navigate(`/account-details/${data._id}`);
       } else {
         setError("Client not found. Please try again.");
       }
     } catch (error) {
       console.log("Something went wrong, please try again later.");
       setError("An error occurred. Please try again later.");
+    } finally {
+      // Stop the loading spinner after the request is done
+      setLoading(false);
     }
   };
 
@@ -44,10 +61,16 @@ const Manage = () => {
       <Wrapper>
         {/* Tab navigation */}
         <TabContainer>
-          <TabButton isActive={activeTab === "search"} onClick={() => setActiveTab("search")}>
+          <TabButton
+            isActive={activeTab === "search"}
+            onClick={() => setActiveTab("search")}
+          >
             Search Existing Client
           </TabButton>
-          <TabButton isActive={activeTab === "add"} onClick={() => setActiveTab("add")}>
+          <TabButton
+            isActive={activeTab === "add"}
+            onClick={() => setActiveTab("add")}
+          >
             Add a new client
           </TabButton>
         </TabContainer>
@@ -62,7 +85,12 @@ const Manage = () => {
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Full Name"
               />
-              <StyledButton onClick={handleSearch}>Retrieve</StyledButton>
+              {/* Show loading spinner or retrieve button based on the loading state */}
+              {loading ? (
+                <Loading /> // Show loading spinner while fetching
+              ) : (
+                <StyledButton onClick={handleSearch}>Retrieve</StyledButton>
+              )}
               {/* Render error message if there's an error */}
               {error && <ErrorMessage>{error}</ErrorMessage>}
             </>
@@ -82,7 +110,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px; 
+  margin-top: 20px;
   color: #333;
   font-family: Arial, sans-serif;
   font-size: 1.2rem;
@@ -125,7 +153,7 @@ const FormContainer = styled.div`
   justify-content: center;
   width: 100%;
   font-family: Arial, sans-serif;
-  margin-top: 50px; 
+  margin-top: 50px;
 `;
 
 // Hero Section with background image
@@ -143,7 +171,6 @@ const HeroSection = styled.div`
 const HeroText = styled.h1`
   color: purple;
   font-size: 2.5rem;
-
 `;
 
 const StyledInput = styled.input`

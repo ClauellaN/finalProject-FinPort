@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import HeroImage from "../pages/assets/details.JPG"; 
+import HeroImage from "../pages/assets/details.JPG";
+import { Loading } from "./LoadingSpiner";
 
+// Functioon to search a client and when a client is found, it displays the the clients details.
 const SearchClient = () => {
-  const { clientId } = useParams(); // Get the clientId from the URL
+  const { clientId } = useParams(); // Getting the clientId from the URL
   const [client, setClient] = useState(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   // Fetch client data when the component mounts using the clientId from the URL
@@ -33,19 +35,21 @@ const SearchClient = () => {
     fetchClientData();
   }, [clientId]); // Run effect whenever clientId changes
 
-  // Function to navigate to the ClientLayout page
+  // Function to navigate to the manage-account page / ClientLayout Page
   const handleManageAccount = () => {
+    // If it is the client and the correct clientId, we're navigating to a different route
     if (client && client._id) {
       navigate(`/manage-account/${client._id}`);
     }
   };
   if (loading) {
-    return <p>Loading client information...</p>; // Display loading state
+    return <Loading />;
   }
 
   return (
     <FormContainer>
-      {error && <ErrorText>{error}</ErrorText>} {/* Show error if client not found */}
+      {error && <ErrorText>{error}</ErrorText>}{" "}
+      {/* Show error if client not found */}
       {client && (
         <>
           {/* Hero image as background */}

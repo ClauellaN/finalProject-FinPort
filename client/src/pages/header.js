@@ -41,6 +41,7 @@ const Navbar = styled.nav`
   background-size: cover;
   background-position: center;
   font-family: arial;
+    background: #f1ebf1;
 `;
 const Logo = styled.img`
   height: 90px;
